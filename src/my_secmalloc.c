@@ -10,6 +10,7 @@
 #include <stdarg.h>
 
 #include "my_secmalloc.private.h"
+#include "heap.h"
 #include "utils.h"
 
 #include "test_utils.h"
@@ -29,7 +30,7 @@ struct heap HEAP = {
 
 
 
-static void* heap_thread_function() {
+/* static void* heap_thread_function() {
     struct block_entry* block;
     canary_t canary;
     size_t i;
@@ -47,12 +48,13 @@ static void* heap_thread_function() {
         usleep(CANARY_CHECK_DELAY);
     }
     return NULL;
-}
+} */
 
 // Using syscall(SYS_clone3,...); is better than using pthread because it removes the dependency to the libpthread.so.0 library.
-static void heap_thread_init() {
+/* static void heap_thread_init() {
     pthread_create(&HEAP.canary_thread,NULL,heap_thread_function,NULL); // Should i do error handling ?
 }
+
 static void heap_thread_stop() {
     pthread_cancel(HEAP.canary_thread); // Should i do error handling ?
     pthread_join(HEAP.canary_thread,NULL); // Should i do error handling ?
@@ -81,7 +83,7 @@ static int32_t heap_init(size_t size) {
     if (HEAP.has_logging)
         heap_thread_init();
     return 0;
-}
+} */
 
 static struct block_entry* heap_get_free_block(size_t size) {
     // This function is not optimal.
@@ -111,7 +113,7 @@ static void block_set_canary(struct block_entry* block) {
     memcpy(block->address+block->size-sizeof(canary_t),&block->canary,sizeof(canary_t));
 }
 
-static void* heap_create_block_at_end(size_t size) {
+/* static void* heap_create_block_at_end(size_t size) {
     struct block_entry new_block = {
         .address = HEAP.end,
         // I will batch the canary generation and setting later.
@@ -165,7 +167,7 @@ static void* heap_create_block(size_t size) {
         // heap_expand(size); // Should i do error handling there ? YES COMPLETLY
 
     return heap_create_block_at_end(size);
-}
+} */
 
 /*
 malloc()
@@ -186,7 +188,7 @@ void *my_malloc(size_t size) {
     return heap_create_block(size);
 }
 
-static int32_t heap_clear() {
+/* static int32_t heap_clear() {
     munmap(HEAP.start,HEAP.virtual_capacity);
     int32_t status = vector_clear(&HEAP.block_vector);
     if (status < 0) return status;
@@ -195,7 +197,7 @@ static int32_t heap_clear() {
         heap_thread_stop();
     HEAP.nbusyblocks = 0;
     return 0;
-}
+} */
 
 // This function is O(N) but would be O(1) just by using a hashmap.
 // I can always implement a hashmap later in the same way i implemented the "vector" structure.
