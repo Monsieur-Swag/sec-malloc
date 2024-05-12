@@ -1,4 +1,14 @@
+#include <stdlib.h>
+#include <sys/mman.h>
+
 #include "my_secmalloc.private.h"
+#include "block.h"
+#include "utils.h"
+
+struct heap HEAP = {
+    .nbusyblocks = 0,
+    .canary_thread = 0 // Is this usefull ?
+};
 
 void* heap_thread_function() {
     struct block_entry* block;

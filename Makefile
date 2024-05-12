@@ -1,7 +1,7 @@
 CC = gcc
 CFLAGS = -I./include -Wall -Wextra -Werror 
 PRJ = my_secmalloc
-OBJS = src/my_secmalloc.o src/vector.o src/test_utils.o src/utils.o src/heap.o
+OBJS = src/my_secmalloc.o src/vector.o src/test_utils.o src/utils.o src/heap.o src/block.o
 SLIB = lib${PRJ}.a
 LIB = lib${PRJ}.so
 
