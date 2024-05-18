@@ -1,7 +1,7 @@
 #ifndef _VECTOR_H
 #define _VECTOR_H
 
-#include "my_secmalloc.private.h"
+// #include "heap.h"
 
 #define V_INDEX(index) vector->start + (index) * vector->item_size
 #define V_SIZE vector->item_size*vector->capacity

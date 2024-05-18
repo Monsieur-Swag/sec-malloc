@@ -1,14 +1,23 @@
 #include <stdlib.h>
+#include <unistd.h>
 #include <sys/mman.h>
 
-#include "my_secmalloc.private.h"
+#include "types.h"
+#include "heap.h"
 #include "block.h"
 #include "utils.h"
+
+#define LOGGING_ENV_VARIABLE "MSM_OUTPUT"
+#define TOTAL_SYSTEM_RAM ((size_t)(sysconf(_SC_PHYS_PAGES)*sysconf(_SC_PAGE_SIZE)))
+#define AVAILABLE_SYSTEME_RAM ((size_t)(sysconf(_SC_AVPHYS_PAGES)*sysconf(_SC_PAGE_SIZE)))
+#define HEAP_MAX_FREE_SPACE (AVAILABLE_SYSTEME_RAM - (HEAP.end - HEAP.start))
+#define CANARY_CHECK_DELAY 1000000 // In microseconds
 
 struct heap HEAP = {
     .nbusyblocks = 0,
     .canary_thread = 0 // Is this usefull ?
 };
+
 
 void* heap_thread_function() {
     struct block_entry* block;
@@ -125,12 +134,8 @@ void* heap_create_block(size_t size) {
         return block->address;
     }
 
-    // if (HEAP_FREE_SPACE < size)
-        // heap_expand(size); // Should i do error handling there ? YES COMPLETLY
-
     return heap_create_block_at_end(size);
 }
-
 
 int32_t heap_clear() {
     munmap(HEAP.start,HEAP.virtual_capacity);
@@ -163,4 +168,3 @@ struct block_entry_indexed heap_get_block(void* ptr) {
     }
     return block_ref;
 }
-

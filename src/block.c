@@ -3,7 +3,14 @@
 #include <sys/mman.h>
 
 #include "my_secmalloc.private.h"
+#include "heap.h"
 #include "block.h"
+
+struct block_mprotect {
+  void* address;
+  size_t size;
+};
+
 
 void block_set_canary(struct block_entry* block) {
     memcpy(block->address+block->size-sizeof(canary_t),&block->canary,sizeof(canary_t));
@@ -76,9 +83,8 @@ void block_free(struct block_entry_indexed* block_ref) {
     size_t clean_size = (first_block->address + first_block->size) - clean_addr;
     clean_size -= clean_size % PAGE_SIZE;
 
-    // int status = 
     mprotect(clean_addr,clean_size,PROT_NONE); // THIS MUST MEMORY ALIGNED !
-    printf("[ALIGNEMENT] mprotect(%p, %lx)\n", clean_addr, clean_size);
+    // printf("[ALIGNEMENT] mprotect(%p, %lx)\n", clean_addr, clean_size);
     madvise(clean_addr,clean_size,MADV_DONTNEED);
 
     if (first_block->address+first_block->size == HEAP.end) {

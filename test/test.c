@@ -1,9 +1,10 @@
 #include <criterion/criterion.h>
 #include <stdio.h>
-#include <sys/mman.h>
 #include <stdint.h>
+#include <sys/mman.h>
 
 #include "my_secmalloc.private.h"
+#include "heap.h"
 #include "test_utils.h"
 
 Test(mmap, simple) {
@@ -74,17 +75,6 @@ Test(vector, memory_size_flexibility) {
 
 // I will have to check all of the MAP_* and MADV_* and MREMAP_ macros and what they do to make a better use of mmap in my allocation functions.
 
-void print_heap() {
-    printf("----- [HEAP STATE] -----\n");
-    printf("- start=%p end=%p size=%lx\n", HEAP.start, HEAP.end, (HEAP.end - HEAP.start));
-    struct block_entry* block = HEAP.block_vector.start;
-    for (size_t i=0;i<HEAP.block_vector.size;i++) {
-        printf("[BLOCK %zu] addr=%p size=%zu, status=%d\n", i, block->address, block->size, block->status);
-        block++;
-    }
-    printf("----- [HEAP STATE] -----\n");
-}
-
 /* Test(my_alloc, simplest) {
     printf("-------------------------------------\n");
     void* a = my_malloc(4096);
@@ -110,6 +100,7 @@ void print_heap() {
 
 // Make unit tests for double free : try with free(pointer) and free(pointer+1)
 
+// Tests can have an output but they should be based on assert statements instead of letting a human judge is the test passed or not
 Test(my_malloc, simple) {
     void* a, *b, *c, *d, *e;
     a = my_malloc(10000);
@@ -122,6 +113,66 @@ Test(my_malloc, simple) {
     void* pointer = a + 7;
     *(uint32_t*)(pointer) = 0x00000001;
     sleep(2); */
+
+    my_free(a);
+    my_free(c);
+    my_free(b);
+    my_free(d);
+    my_free(e);
+}
+
+Test(my_realloc, lower_size) {
+    printf("--- [my_realloc : lower_size] ---\n");
+    void* a, *b, *c, *d, *e;
+    a = my_malloc(10000);
+    b = my_malloc(20000);
+    c = my_malloc(30000);
+    d = my_malloc(40000);
+    e = my_malloc(50000);
+
+    print_heap();
+    my_realloc(c,10000);
+    print_heap();
+
+    my_free(a);
+    my_free(c);
+    my_free(b);
+    my_free(d);
+    my_free(e);
+}
+
+Test(my_realloc, same_size) {
+    printf("--- [my_realloc : same_size] ---\n");
+    void* a, *b, *c, *d, *e;
+    a = my_malloc(10000);
+    b = my_malloc(20000);
+    c = my_malloc(30000);
+    d = my_malloc(40000);
+    e = my_malloc(50000);
+
+    print_heap();
+    my_realloc(c,30000);
+    print_heap();
+
+    my_free(a);
+    my_free(c);
+    my_free(b);
+    my_free(d);
+    my_free(e);
+}
+
+Test(my_realloc, greater_size) {
+    printf("--- [my_realloc : greater_size] ---\n");
+    void* a, *b, *c, *d, *e;
+    a = my_malloc(10000);
+    b = my_malloc(20000);
+    c = my_malloc(30000);
+    d = my_malloc(40000);
+    e = my_malloc(50000);
+
+    print_heap();
+    my_realloc(c,60000);
+    print_heap();
 
     my_free(a);
     my_free(c);

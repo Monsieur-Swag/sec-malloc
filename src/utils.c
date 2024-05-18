@@ -2,8 +2,11 @@
 #include <stdlib.h>
 #include <fcntl.h>
 #include <stdarg.h>
+#include <unistd.h>
 
-#include "my_secmalloc.private.h"
+#include "types.h"
+
+#define RANDOM_DEVICE "/dev/urandom"
 
 void my_printf(const char* format,...) {
     va_list args;

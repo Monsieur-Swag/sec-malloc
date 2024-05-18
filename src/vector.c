@@ -1,12 +1,11 @@
 #define _GNU_SOURCE
-
-#include <sys/mman.h>
-#include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <string.h>
+#include <sys/mman.h>
 
-#include <my_secmalloc.private.h>
+#include "vector.h"
 
 int32_t vector_init(struct vector* vector, size_t capacity, size_t item_size) {
   if (capacity == 0 || item_size == 0)

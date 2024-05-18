@@ -1,19 +1,19 @@
 #define _GNU_SOURCE
 #include <stdio.h>
-#include <fcntl.h>
-// #include <alloca.h>
-#include <unistd.h>
-#include <sys/mman.h>
-#include <string.h>
-#include <pthread.h>
 #include <stdlib.h>
+#include <unistd.h>
+#include <string.h>
+#include <sys/mman.h>
+#include <pthread.h>
 #include <stdarg.h>
+#include <fcntl.h>
 
-#include "my_secmalloc.private.h"
+#include "types.h"
 #include "heap.h"
 #include "block.h"
 #include "utils.h"
 
+// ----- REMOVE THIS LATER ----- //
 #include "test_utils.h"
 #define _DEBUG 0
 #if _DEBUG == 1
@@ -21,6 +21,7 @@ static size_t _DEBUG_VAUE = 0;
 #define DEBUG() printf("DEBUG %zu\n", ++_DEBUG_VAUE);
 #endif
 #define PRINT(...) printf(__VA_ARGS__);putchar('\n');
+// ----- REMOVE THIS LATER ----- //
 
 // Reminder: NOTHING in this library is thread safe (i could just put a global mutex stored in the HEAP object)
 
@@ -106,6 +107,9 @@ realloc()
 */
 void *my_realloc(void *ptr, size_t size)
 {
+    struct block_entry_indexed block_ref;
+    size += sizeof(canary_t);
+
     if (ptr == NULL)
         return my_malloc(size);
 
@@ -114,22 +118,35 @@ void *my_realloc(void *ptr, size_t size)
         return NULL;
     }
 
-    /* struct block_entry_indexed block_entry = heap_get_block(ptr);
-    if (ptr == NULL)
-        return NULL;
-    if (block_entry.block->size == size)
-        return ptr
-    
-    if (block_entry.block->size > size) {
+    block_ref = heap_get_block(ptr);; // Put this on the top of the function, and do it for any variable declaration in any function in this library.
 
+    if (block_ref.block->size == size)
+        return ptr;
+
+    size_t diff = block_ref.block->size - size;
+    struct block_entry new_free_block = {
+        .canary = canary_generate(),
+        .status = FREE,
+        .size = diff,
+        .address = ptr + size
+    }; // If free blocks have a size inferior or equal to 8 they are unusable but could be usefull later after a free block fusion.
+
+    printf("[COMPARAISON] %zu > %zu\n", block_ref.block->size, size);
+
+    if (size == block_ref.block->size)
+        return block_ref.block->address;
+
+    if (size > block_ref.block->size) {
+        my_free(ptr); // This is not the best way to do this
+        block_free(&block_ref);
+        return heap_create_block(size);
     } else {
-        
-    } */
-    
-    // If the size of the block if inferior do something and return ptr
-    // If the size of the block is superior do something else and maybe return a new pointer
+        block_ref.block->size = size;
+        block_set_canary(block_ref.block);
+        vector_push(&HEAP.block_vector,&new_free_block);
+    }
 
-    return NULL;
+    return block_ref.block->address;
 }
 
 #ifdef DYNAMIC

@@ -1,14 +1,28 @@
 #include <stdio.h>
-#include <string.h>
 #include <stdlib.h>
+#include <string.h>
+#include <unistd.h>
 
-#include "my_secmalloc.private.h"
+#include "vector.h"
+#include "heap.h"
+#include "block.h"
 
 void show_maps() {
   char cmd[1024];
   memset(cmd,'\0',1024);
   snprintf(cmd, 1024, "cat /proc/%d/maps", getpid());
   system(cmd);
+}
+
+void print_heap() {
+    printf("----- [HEAP STATE] -----\n");
+    printf("- start=%p end=%p size=%lx\n", HEAP.start, HEAP.end, (HEAP.end - HEAP.start));
+    struct block_entry* block = HEAP.block_vector.start;
+    for (size_t i=0;i<HEAP.block_vector.size;i++) {
+        printf("[BLOCK %zu] addr=%p size=%zu, status=%d\n", i, block->address, block->size, block->status);
+        block++;
+    }
+    printf("----- [HEAP STATE] -----\n");
 }
 
 void vector_print(struct vector* vector) {
