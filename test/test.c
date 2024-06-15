@@ -112,7 +112,6 @@ Test(my_malloc, simple) {
 }
 
 Test(my_realloc, lower_size) {
-    printf("--- [my_realloc : lower_size] ---\n");
     void* a, *b, *c, *d, *e;
     a = my_malloc(10000);
     b = my_malloc(20000);
@@ -146,7 +145,6 @@ Test(my_realloc, lower_size) {
 }
 
 Test(my_realloc, same_size) {
-    // printf("--- [my_realloc : same_size] ---\n");
     void* a, *b, *c, *d, *e;
     a = my_malloc(10000);
     b = my_malloc(20000);
@@ -154,9 +152,7 @@ Test(my_realloc, same_size) {
     d = my_malloc(40000);
     e = my_malloc(50000);
 
-    // print_heap();
     my_realloc(c,30000);
-    // print_heap();
 
     my_free(a);
     my_free(c);
@@ -166,7 +162,6 @@ Test(my_realloc, same_size) {
 }
 
 Test(my_calloc, greater_size) {
-    printf("--- [my_calloc] ---\n");
     void* a, *b, *c, *d, *e;
     a = my_calloc(1,10000);
     b = my_calloc(2,10000);
