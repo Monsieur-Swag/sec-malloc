@@ -75,6 +75,7 @@ int32_t heap_init(size_t size) {
 
 struct block_entry* heap_get_free_block(size_t size) {
     // This function is not optimal.
+    // Everything in this library is not thread safe (if a thread remove elements from the vector the block_entry may be switched within the vector, so the pointer returned by this function could be pointing to a new unexcpected block entry)
     struct block_entry* block = HEAP.block_vector.start;
     for (size_t i=0;i<HEAP.block_vector.size;i++) {
         if (block->status == FREE && block->size >= size)

@@ -114,11 +114,26 @@ Test(my_malloc, simple) {
     *(uint32_t*)(pointer) = 0x00000001;
     sleep(2); */
 
+    cr_expect((HEAP.end - HEAP.start) == 150000 + 5*sizeof(canary_t)); // Verify that the HEAP memory space is contiguous
+
     my_free(a);
     my_free(c);
+
+    struct block_entry* first_block = heap_get_free_block(5000);
+    cr_expect(first_block->status == FREE && first_block->size == 10000 + sizeof(canary_t) && first_block->address == a); // Allocating (5000+8) bytes returns the (10000+8) block of pointed by a.
+    struct block_entry* third_block = heap_get_free_block(15000);
+    cr_expect(third_block->status == FREE && third_block->size == 30000 + sizeof(canary_t) && third_block->address == c); // Allocating (5000+8) bytes returns the (10000+8) block of pointed by c.
+
     my_free(b);
+
+    struct block_entry* big_block = heap_get_free_block(5000);
+    cr_expect(big_block->status == FREE && big_block->size == 60000 + 3*sizeof(canary_t) && big_block->address == a);
+
     my_free(d);
     my_free(e);
+
+    big_block = heap_get_free_block(1000);
+    cr_expect(big_block == NULL); // If all the heap memory is freed there is no free block left registered.
 }
 
 Test(my_realloc, lower_size) {
@@ -130,9 +145,9 @@ Test(my_realloc, lower_size) {
     d = my_malloc(40000);
     e = my_malloc(50000);
 
-    print_heap();
+    // print_heap();
     my_realloc(c,10000);
-    print_heap();
+    // print_heap();
 
     my_free(a);
     my_free(c);
@@ -142,7 +157,7 @@ Test(my_realloc, lower_size) {
 }
 
 Test(my_realloc, same_size) {
-    printf("--- [my_realloc : same_size] ---\n");
+    // printf("--- [my_realloc : same_size] ---\n");
     void* a, *b, *c, *d, *e;
     a = my_malloc(10000);
     b = my_malloc(20000);
@@ -150,9 +165,9 @@ Test(my_realloc, same_size) {
     d = my_malloc(40000);
     e = my_malloc(50000);
 
-    print_heap();
+    // print_heap();
     my_realloc(c,30000);
-    print_heap();
+    // print_heap();
 
     my_free(a);
     my_free(c);
@@ -170,9 +185,9 @@ Test(my_realloc, greater_size) {
     d = my_malloc(40000);
     e = my_malloc(50000);
 
-    print_heap();
+    // print_heap();
     my_realloc(c,60000);
-    print_heap();
+    // print_heap();
 
     my_free(a);
     my_free(c);
