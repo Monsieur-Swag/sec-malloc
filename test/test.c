@@ -165,7 +165,7 @@ Test(my_realloc, lower_size) {
     my_free(b);
     my_free(d);
     my_free(e);
-    
+
     free_block = heap_get_free_block(1);
     cr_expect(free_block == NULL); // If all the heap memory is freed there is no free block left registered.
 }
@@ -190,18 +190,24 @@ Test(my_realloc, same_size) {
     my_free(e);
 }
 
-Test(my_realloc, greater_size) {
-    printf("--- [my_realloc : greater_size] ---\n");
+Test(my_calloc, greater_size) {
+    printf("--- [my_calloc] ---\n");
     void* a, *b, *c, *d, *e;
-    a = my_malloc(10000);
-    b = my_malloc(20000);
-    c = my_malloc(30000);
-    d = my_malloc(40000);
-    e = my_malloc(50000);
+    a = my_calloc(1,10000);
+    b = my_calloc(2,10000);
+    c = my_calloc(3,10000);
+    d = my_calloc(4,10000);
+    e = my_calloc(5,10000);
 
-    // print_heap();
-    my_realloc(c,60000);
-    // print_heap();
+    cr_expect((HEAP.end - HEAP.start) == 150000 + 5*sizeof(canary_t)); // Verify that the HEAP memory space is contiguous
+    void* memory_allocs[5] = {a,b,c,d,e};
+    char* memory_alloc;
+    for (int i=0;i<5;i++) {
+        memory_alloc = memory_allocs[i];
+        for (int j=0;j<10000*(i+1);j++) {
+            cr_assert(memory_alloc[j] == 0); // Check that all bytes except canaries are set to zero.
+        }
+    }
 
     my_free(a);
     my_free(c);
