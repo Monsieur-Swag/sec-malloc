@@ -86,7 +86,7 @@ void  *my_calloc(size_t nmemb, size_t size)
         return NULL;
     size_t alloc_size = nmemb*size;
     void* addr = my_malloc(alloc_size);
-    if (addr != NULL && nmemb > 0 && size > 0)
+    if (addr != NULL)
         memset(addr,0,alloc_size);
     return addr;
 }
