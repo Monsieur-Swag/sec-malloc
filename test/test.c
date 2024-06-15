@@ -145,15 +145,29 @@ Test(my_realloc, lower_size) {
     d = my_malloc(40000);
     e = my_malloc(50000);
 
-    // print_heap();
-    my_realloc(c,10000);
-    // print_heap();
+    c = my_realloc(c,10000);
+
+    struct block_entry_indexed c_block = heap_get_block(c);
+    struct block_entry* free_block = heap_get_free_block(1000);
+    cr_expect(free_block->address == c + c_block.block->size); // Check that the new free block if contiguous after the C block
+
+    d = my_realloc(d,100000);
+
+    // struct block_entry_indexed d_block = heap_get_block(c);
+    free_block = heap_get_free_block(1000);
+    cr_expect(free_block->address == c + c_block.block->size); // Check that the free block created by the C realloc and the free block created by the second D realloc are merged.
+
+    free_block = heap_get_free_block(1000000000);
+    cr_expect(free_block == NULL); // Check that heap_get_free_block returns NULL when no big enough free blocks is available for a specific size.
 
     my_free(a);
     my_free(c);
     my_free(b);
     my_free(d);
     my_free(e);
+    
+    free_block = heap_get_free_block(1);
+    cr_expect(free_block == NULL); // If all the heap memory is freed there is no free block left registered.
 }
 
 Test(my_realloc, same_size) {
