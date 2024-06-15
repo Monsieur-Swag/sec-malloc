@@ -131,8 +131,6 @@ void *my_realloc(void *ptr, size_t size)
         .address = ptr + size
     }; // If free blocks have a size inferior or equal to 8 they are unusable but could be usefull later after a free block fusion.
 
-    printf("[COMPARAISON] %zu > %zu\n", block_ref.block->size, size);
-
     if (size == block_ref.block->size)
         return block_ref.block->address;
 
