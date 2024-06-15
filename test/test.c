@@ -73,31 +73,6 @@ Test(vector, memory_size_flexibility) {
     cr_expect(vector_clear(&vector) >= 0);
 }
 
-// I will have to check all of the MAP_* and MADV_* and MREMAP_ macros and what they do to make a better use of mmap in my allocation functions.
-
-/* Test(my_alloc, simplest) {
-    printf("-------------------------------------\n");
-    void* a = my_malloc(4096);
-    void* b = my_malloc(4096);
-    void* c = my_malloc(4096);
-    void* d = my_malloc(4096);
-    void* e = my_malloc(4096);
-    // printf("Pointers = A=%p B=%p C=%p D=%p E=%p\n", a, b, c, d, e);
-    my_free(b);
-    my_free(d);
-    my_free(c);
-    printf("-------------------------------------\n");
-    printf("-------------------------------------\n");
-    void* new2 = my_malloc(20000); // 4096*3
-    // void* new = my_malloc(16384);
-    show_maps();
-    print_heap();
-    // my_free(new);
-    my_free(new2);
-    my_free(a);my_free(e);
-    printf("-------------------------------------\n");
-} */
-
 // Make unit tests for double free : try with free(pointer) and free(pointer+1)
 
 // Tests can have an output but they should be based on assert statements instead of letting a human judge is the test passed or not
