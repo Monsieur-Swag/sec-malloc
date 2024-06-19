@@ -37,7 +37,13 @@ void *my_malloc(size_t size) {
         return NULL;
 
     size += sizeof(canary_t); // Should i check for interger overflows ? 0xffffffffffffffff + sizeof(canart_t) would be equal to sizeof(canary_t) - 1 for example.
-    if (size < 32) { size = 32; }
+    if (size < 32) {
+        size = 32;
+    }
+    else {
+        size = size%0x10 == 0 ?
+            size : size + (0x10 - size%0x10);
+    }
     if (HEAP.nbusyblocks == 0) {
         if (heap_init(size) >= 0) {
             return heap_create_block_at_end(size);
@@ -122,6 +128,14 @@ void *my_realloc(void *ptr, size_t size)
     if (size == 0) {
         my_free(ptr);
         return NULL;
+    }
+
+    if (size < 32) {
+        size = 32;
+    }
+    else {
+        size = size%0x10 == 0 ?
+            size : size + (0x10 - size%0x10);
     }
 
     block_ref = heap_get_block(ptr);; // Put this on the top of the function, and do it for any variable declaration in any function in this library.
