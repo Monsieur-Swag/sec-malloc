@@ -125,14 +125,21 @@ void* heap_create_block(size_t size) {
             .status = FREE,
             .size = remaining_size
         };
-        if (vector_push(&HEAP.block_vector,&new_free_block) < 0) return NULL;
 
+        struct block_entry block_backup = *block;
         block->status = PROCESSED; // Is this usefull ?
         block->size = size;
         block_mprotect(block);
         block->status = BUSY;
+        void* block_address = block->address;
+
+        if (vector_push(&HEAP.block_vector,&new_free_block) < 0) {
+            *block = block_backup;
+            return NULL;
+        }
+
         HEAP.nbusyblocks++;
-        return block->address;
+        return block_address;
     }
 
     return heap_create_block_at_end(size);
