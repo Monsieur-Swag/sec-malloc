@@ -5,7 +5,7 @@
 #include "my_secmalloc.private.h"
 #include "heap.h"
 #include "block.h"
-
+ 
 struct block_mprotect {
   void* address;
   size_t size;
@@ -89,7 +89,7 @@ void block_free(struct block_entry_indexed* block_ref) {
 
     if (first_block->address+first_block->size == HEAP.end) {
         HEAP.end = first_block->address;
-        vector_erase(&HEAP.block_vector,block_before != NULL ? block_ref->index : block_before_index);
+        vector_erase(&HEAP.block_vector,block_before == NULL ? block_ref->index : block_before_index);
     }
 
     HEAP.nbusyblocks--;

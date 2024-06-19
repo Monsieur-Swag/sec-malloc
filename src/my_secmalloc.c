@@ -33,12 +33,18 @@ malloc()
 */
 void *my_malloc(size_t size) {
     // I should return errno for function returning void pointers too (like MAP_FAILED) is MAP_FAILED even an errno ?
+    if (size == 0)
+        return NULL;
+
     size += sizeof(canary_t); // Should i check for interger overflows ? 0xffffffffffffffff + sizeof(canart_t) would be equal to sizeof(canary_t) - 1 for example.
+    if (size < 32) { size = 32; }
     if (HEAP.nbusyblocks == 0) {
-        if (heap_init(size) >= 0)
+        if (heap_init(size) >= 0) {
             return heap_create_block_at_end(size);
-        else
+        }
+        else {
             return NULL;
+        }
     }
 
     return heap_create_block(size);
@@ -154,7 +160,7 @@ void *malloc(size_t size)
 }
 void free(void *ptr)
 {
-    my_free(ptr);
+    return my_free(ptr);
 }
 void *calloc(size_t nmemb, size_t size)
 {
@@ -164,7 +170,6 @@ void *calloc(size_t nmemb, size_t size)
 void *realloc(void *ptr, size_t size)
 {
     return my_realloc(ptr, size);
-
 }
 
 #endif

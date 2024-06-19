@@ -6,6 +6,7 @@
 #include "vector.h"
 #include "heap.h"
 #include "block.h"
+#include "utils.h"
 
 void show_maps() {
   char cmd[1024];
@@ -15,18 +16,26 @@ void show_maps() {
 }
 
 void print_heap() {
-    printf("----- [HEAP STATE] -----\n");
-    printf("- start=%p end=%p size=%lx\n", HEAP.start, HEAP.end, (HEAP.end - HEAP.start));
+    my_printf("----- [HEAP STATE] -----");
+    my_printf("- start=%p end=%p size=0x%lx", HEAP.start, HEAP.end, (HEAP.end - HEAP.start));
+    char buffer[0x1000];
+    size_t size_to_copy = 0;
     struct block_entry* block = HEAP.block_vector.start;
     for (size_t i=0;i<HEAP.block_vector.size;i++) {
-        printf("[BLOCK %zu] addr=%p size=%zu, status=%d\n", i, block->address, block->size, block->status);
+        my_printf("[BLOCK %zu] addr=%p size=%zu, status=%d", i, block->address, block->size, block->status);
+        size_to_copy = block->size;
+        if (size_to_copy > 0) {
+          if (size_to_copy > 0x1000) size_to_copy = 0x1000;
+          memcpy(buffer,block->address,size_to_copy);
+          // memset(block->address,0,size_to_copy);
+        }
         block++;
     }
-    printf("----- [HEAP STATE] -----\n");
+    my_printf("----- [HEAP STATE] -----");
 }
 
 void vector_print(struct vector* vector) {
-  printf("[Vector] start=%p capacity=%zu size=%zu item_size=%zu memory_size=%zu\n", vector->start, vector->capacity, vector->size, vector->item_size, V_SIZE);
+  my_printf("[Vector] start=%p capacity=%zu size=%zu item_size=%zu memory_size=%zu", vector->start, vector->capacity, vector->size, vector->item_size, V_SIZE);
 }
 
 int32_t vector_set(struct vector* vector, size_t from, size_t to, void* item) {
