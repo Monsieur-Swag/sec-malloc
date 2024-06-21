@@ -58,13 +58,20 @@ void block_free(struct block_entry_indexed* block_ref) {
     // printf("Block=%p Before=%p After=%p\n", block_ref->block->address, block_before, block_after);
     if (block_before != NULL && block_after != NULL) {
         block_before->size += (block_ref->block->size + block_after->size);
-        vector_erase(&HEAP.block_vector,block_ref->index);
-        vector_erase(&HEAP.block_vector,block_after_index);
+        // We don't want the index in the second vector_erase block to change because of the first vector_erase.
+        if (block_ref->index > block_after_index) {
+            vector_erase(&HEAP.block_vector,block_ref->index);
+            vector_erase(&HEAP.block_vector,block_after_index);
+        } else {
+            vector_erase(&HEAP.block_vector,block_after_index);
+            vector_erase(&HEAP.block_vector,block_ref->index);
+        }
     } else if (block_before != NULL) {
         block_before->size += block_ref->block->size;
         vector_erase(&HEAP.block_vector,block_ref->index);
     } else if (block_after != NULL) {
         block_ref->block->size += block_after->size;
+        block_ref->block->status = FREE;
         vector_erase(&HEAP.block_vector,block_after_index);
     } else {
         block_ref->block->status = FREE;

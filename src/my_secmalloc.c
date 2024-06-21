@@ -119,7 +119,16 @@ realloc()
 */
 void *my_realloc(void *ptr, size_t size)
 {
+    // Really bad, but i have to redo the secmalloc and i was told to do that :(
     struct block_entry_indexed block_ref;
+    if (ptr != NULL) {
+        block_ref = heap_get_block(ptr);
+        if (block_ref.block != NULL)
+            block_free(&block_ref);
+    }
+    return my_malloc(size);
+
+    /* struct block_entry_indexed block_ref;
     size += sizeof(canary_t);
 
     if (ptr == NULL)
@@ -164,7 +173,7 @@ void *my_realloc(void *ptr, size_t size)
         vector_push(&HEAP.block_vector,&new_free_block);
     }
 
-    return block_ref.block->address;
+    return block_ref.block->address; */
 }
 
 #ifdef DYNAMIC
